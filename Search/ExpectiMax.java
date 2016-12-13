@@ -83,12 +83,12 @@ public class ExpectiMax {
      *
      * @param state Current state we are trying to maximize
      * @param depth The current depth of the search tree
-     * @param cprob The current cutoff probability of this state
+     * @param prob The current cutoff probability of this state
      * @return returns the value of the best move evaluated in the subtree
      */
-    public double maxValue( long state , int depth , float cprob ) {
+    public double maxValue( long state , int depth , float prob ) {
 
-        if( cprob < MINIMUM_STATE_PROBABILITY || depth == MAX_DEPTH ) {
+        if( prob < MINIMUM_STATE_PROBABILITY || depth == MAX_DEPTH ) {
             return Evaluator.evaluateBoard( state );
         }
 
@@ -106,7 +106,7 @@ public class ExpectiMax {
         int len = moves.size();
         for( int i = 0; i < len; i++ ) {
             action = moves.get( i );
-            maxValue = Math.max( maxValue , this.probValue( action , depth+1 , cprob ) );
+            maxValue = Math.max( maxValue , this.probValue( action , depth+1 , prob ) );
         }
         //if(CACHE_DEPTH >= depth) {
             CACHE.put(state, maxValue);
@@ -121,10 +121,10 @@ public class ExpectiMax {
      *
      * @param state current state that we are adding a tile to
      * @param depth current search depth
-     * @param cprob current cutoff probability of this state
+     * @param prob current cutoff probability of this state
      * @return
      */
-    public double probValue( long state , int depth , float cprob ) {
+    public double probValue( long state , int depth , float prob ) {
         if( depth == MAX_DEPTH ){
             return Evaluator.evaluateBoard( state );
         }
@@ -134,7 +134,7 @@ public class ExpectiMax {
          * of appearing in a specific space
          */
         double emptySpaces = BitBoard.emptySpaces( state );
-        cprob /= emptySpaces;
+        prob /= emptySpaces;
         long mask = 0x000000000000000FL; //used to extract each 4 bit sqaure on the board
         /**
          * For the actual probabilistic algoritm, we start by iterating over all 16 square.
@@ -146,8 +146,8 @@ public class ExpectiMax {
          */
         for( int i = 0; i < 16; i++ ) {
             if( ( mask & state ) == 0 ) {
-                value += .9 * ( maxValue( (state | (   TILE_TWO        << ( i * 4 ) ) ), depth + 1, cprob * .9f ) );
-                value += .1 * ( maxValue( (state | ( ( TILE_TWO << 1 ) << ( i * 4 ) ) ), depth + 1, cprob * .1f ) );
+                value += .9 * ( maxValue( (state | (   TILE_TWO        << ( i * 4 ) ) ), depth + 1, prob * .9f ) );
+                value += .1 * ( maxValue( (state | ( ( TILE_TWO << 1 ) << ( i * 4 ) ) ), depth + 1, prob * .1f ) );
             }
             mask = mask << 4;
         }
